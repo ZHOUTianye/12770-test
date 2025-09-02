@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信读书翻页效果</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .book-container {
+            width: 400px;
+            height: 600px;
+            position: relative;
+            background: #fff;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        .page h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .page p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .page-current {
+            z-index: 3;
+        }
+
+        .page-next {
+            z-index: 2;
+        }
+
+        .page-flip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 4;
+            pointer-events: none;
+            clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+            transform-origin: bottom right;
+            perspective: 1000px;
+        }
+
+        .page-flip-content {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            transform: scaleX(-1);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            filter: blur(0.5px) brightness(0.9);
+            opacity: 0.95;
+        }
+
+        .page-flip-content h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .page-flip-content p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .page-shadow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0.3) 100%);
+            clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+            opacity: 0;
+        }
+
+        .flip-instruction {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 10;
+            transition: opacity 0.3s ease;
+        }
+
+        .flip-instruction.hidden {
+            opacity: 0;
+        }
+
+        @keyframes pageFlip {
+            0% {
+                clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+                transform: rotateY(0deg);
+            }
+            100% {
+                clip-path: polygon(-100% -100%, 100% -100%, -100% 100%);
+                /* transform: rotateY(-180deg); */
+            }
+        }
+
+        @keyframes pageShadow {
+            0% {
+                clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                clip-path: polygon(-100% -100%, 100% -100%, -100% 100%);
+                opacity: 0.8;
+            }
+        }
+
+        .flipping .page-flip {
+            animation: pageFlip 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .flipping .page-shadow {
+            animation: pageShadow 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="book-container" id="bookContainer">
+        <!-- 当前页 -->
+        <div class="page page-current" id="currentPage">
+            <h1>第一页</h1>
+            <p>这是一个模拟微信读书翻页效果的演示页面。点击页面可以看到从右下角向左上角的翻页动画。</p>
+            <p>翻页过程中会看到折痕线沿着对角线移动，折痕右下角的内容会产生镜像对称效果，同时逐渐露出下一页的内容。</p>
+            <p>整个动画过程持续3秒钟，并配有阴影效果来增强立体感和真实感。</p>
+            <p>这种翻页效果广泛应用于电子阅读应用中，为用户提供更加自然和直观的阅读体验。</p>
+        </div>
+
+        <!-- 下一页 -->
+        <div class="page page-next" id="nextPage">
+            <h1>第二页</h1>
+            <p>欢迎来到第二页！这里展示的是翻页后显示的新内容。</p>
+            <p>在实际的阅读应用中，这里会显示书籍的下一页内容，可能包含文字、图片或其他多媒体元素。</p>
+            <p>翻页动画通过CSS的clip-path属性和动画来实现，模拟了真实书页翻动的物理效果。</p>
+            <p>你可以继续点击来体验更多页面的翻转效果。</p>
+        </div>
+
+        <!-- 翻页层 -->
+        <div class="page-flip" id="pageFlip">
+            <div class="page-flip-content" id="pageFlipContent">
+                <h1>第一页</h1>
+                <p>这是一个模拟微信读书翻页效果的演示页面。点击页面可以看到从右下角向左上角的翻页动画。</p>
+                <p>翻页过程中会看到折痕线沿着对角线移动，折痕右下角的内容会产生镜像对称效果，同时逐渐露出下一页的内容。</p>
+                <p>整个动画过程持续3秒钟，并配有阴影效果来增强立体感和真实感。</p>
+                <p>这种翻页效果广泛应用于电子阅读应用中，为用户提供更加自然和直观的阅读体验。</p>
+            </div>
+        </div>
+
+        <!-- 阴影层 -->
+        <div class="page-shadow" id="pageShadow"></div>
+
+        <!-- 操作提示 -->
+        <div class="flip-instruction" id="flipInstruction">
+            点击页面开始翻页
+        </div>
+    </div>
+
+    <script>
+        let isFlipping = false;
+        let currentPageIndex = 0;
+        
+        const pages = [
+            {
+                title: "第一页",
+                content: [
+                    "这是一个模拟微信读书翻页效果的演示页面。点击页面可以看到从右下角向左上角的翻页动画。",
+                    "翻页过程中会看到折痕线沿着对角线移动，折痕右下角的内容会产生镜像对称效果，同时逐渐露出下一页的内容。",
+                    "整个动画过程持续3秒钟，并配有阴影效果来增强立体感和真实感。",
+                    "这种翻页效果广泛应用于电子阅读应用中，为用户提供更加自然和直观的阅读体验。"
+                ]
+            },
+            {
+                title: "第二页",
+                content: [
+                    "欢迎来到第二页！这里展示的是翻页后显示的新内容。",
+                    "在实际的阅读应用中，这里会显示书籍的下一页内容，可能包含文字、图片或其他多媒体元素。",
+                    "翻页动画通过CSS的clip-path属性和动画来实现，模拟了真实书页翻动的物理效果。",
+                    "你可以继续点击来体验更多页面的翻转效果。"
+                ]
+            },
+            {
+                title: "第三页",
+                content: [
+                    "这是第三页的内容。每次翻页都会展示新的页面内容。",
+                    "翻页效果的核心在于模拟真实纸质书籍的翻页体验，让数字阅读更加自然。",
+                    "通过精心设计的动画曲线和时间控制，可以营造出逼真的翻页感觉。",
+                    "这种效果不仅美观，还能帮助用户更好地感知阅读进度和页面转换。"
+                ]
+            },
+            {
+                title: "第四页",
+                content: [
+                    "恭喜你已经翻到第四页了！翻页效果是不是很流畅？",
+                    "在移动设备上，这种翻页效果通常结合触摸手势来实现更加直观的交互。",
+                    "设计师和开发者需要仔细调节动画的各个参数，包括速度、缓动函数和视觉效果。",
+                    "好的翻页效果能够显著提升用户的阅读体验和应用的整体品质。"
+                ]
+            }
+        ];
+
+        const bookContainer = document.getElementById('bookContainer');
+        const currentPage = document.getElementById('currentPage');
+        const nextPage = document.getElementById('nextPage');
+        const pageFlip = document.getElementById('pageFlip');
+        const pageFlipContent = document.getElementById('pageFlipContent');
+        const flipInstruction = document.getElementById('flipInstruction');
+
+        function updatePageContent(pageElement, pageData) {
+            pageElement.innerHTML = `
+                <h1>${pageData.title}</h1>
+                ${pageData.content.map(p => `<p>${p}</p>`).join('')}
+            `;
+        }
+
+        function flipPage() {
+            if (isFlipping) return;
+            
+            isFlipping = true;
+            flipInstruction.classList.add('hidden');
+            
+            // 翻页层显示当前页内容的镜像（模拟纸张背面透出的内容）
+            const currentPageData = pages[currentPageIndex];
+            pageFlipContent.innerHTML = `
+                <h1>${currentPageData.title}</h1>
+                ${currentPageData.content.map(p => `<p>${p}</p>`).join('')}
+            `;
+            
+            // 更新下一页内容
+            const nextPageIndex = (currentPageIndex + 1) % pages.length;
+            updatePageContent(nextPage, pages[nextPageIndex]);
+            
+            // 开始翻页动画
+            bookContainer.classList.add('flipping');
+            
+            // 动画结束后的处理
+            setTimeout(() => {
+                // 切换页面
+                currentPageIndex = nextPageIndex;
+                updatePageContent(currentPage, pages[currentPageIndex]);
+                
+                // 重置状态
+                bookContainer.classList.remove('flipping');
+                isFlipping = false;
+                flipInstruction.classList.remove('hidden');
+                
+                // 重置clip-path和transform
+                pageFlip.style.clipPath = 'polygon(100% 100%, 100% 100%, 100% 100%)';
+                pageFlip.style.transform = 'rotateY(0deg)';
+                document.getElementById('pageShadow').style.clipPath = 'polygon(100% 100%, 100% 100%, 100% 100%)';
+            }, 3000);
+        }
+
+        // 初始化
+        updatePageContent(currentPage, pages[0]);
+        updatePageContent(nextPage, pages[1]);
+
+        // 绑定点击事件
+        bookContainer.addEventListener('click', flipPage);
+
+        // 5秒后隐藏提示
+        setTimeout(() => {
+            if (!isFlipping) {
+                flipInstruction.style.opacity = '0.6';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

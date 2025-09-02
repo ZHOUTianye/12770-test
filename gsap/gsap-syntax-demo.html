@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP 语法汇总 - 动画演示</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.95);
+            margin: 20px 0;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .demo-section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .demo-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+            min-height: 150px;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .demo-box {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .demo-box:hover {
+            transform: scale(1.05);
+        }
+
+        .demo-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .demo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            border-left: 4px solid #667eea;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .timeline-progress {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .timeline-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.1s ease;
+        }
+
+        .morphing-path {
+            stroke: #667eea;
+            stroke-width: 3;
+            fill: none;
+        }
+
+        .scroll-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 50px 0;
+            border-radius: 15px;
+        }
+
+        .scroll-text {
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .demo-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GSAP 语法汇总与演示</h1>
+
+        <!-- 基本动画 -->
+        <div class="demo-section">
+            <h2>1. 基本动画方法</h2>
+            <div class="demo-area">
+                <div class="demo-box" id="box1">TO</div>
+                <div class="demo-box" id="box2">FROM</div>
+                <div class="demo-box" id="box3">FROMTO</div>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="animateBasic()">播放基本动画</button>
+                <button class="btn" onclick="resetBasic()">重置</button>
+            </div>
+            <div class="code-block">
+// gsap.to() - 从当前状态动画到目标状态
+gsap.to("#box1", {
+    x: 200,
+    y: 50,
+    rotation: 360,
+    duration: 2,
+    ease: "bounce.out"
+});
+
+// gsap.from() - 从指定状态动画到当前状态
+gsap.from("#box2", {
+    x: -200,
+    y: -50,
+    scale: 0,
+    duration: 2,
+    ease: "elastic.out"
+});
+
+// gsap.fromTo() - 从指定状态动画到另一个指定状态
+gsap.fromTo("#box3", 
+    { x: -100, scale: 0, rotation: -180 },
+    { x: 100, scale: 1.5, rotation: 180, duration: 2, ease: "power2.inOut" }
+);
+            </div>
+        </div>
+
+        <!-- 时间线动画 -->
+        <div class="demo-section">
+            <h2>2. 时间线 (Timeline)</h2>
+            <div class="demo-area">
+                <div class="demo-circle" id="circle1">1</div>
+                <div class="demo-circle" id="circle2">2</div>
+                <div class="demo-circle" id="circle3">3</div>
+                <div class="demo-circle" id="circle4">4</div>
+            </div>
+            <div class="timeline-progress">
+                <div class="timeline-bar" id="timelineBar"></div>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="animateTimeline()">播放时间线</button>
+                <button class="btn" onclick="pauseTimeline()">暂停</button>
+                <button class="btn" onclick="resumeTimeline()">继续</button>
+                <button class="btn" onclick="resetTimeline()">重置</button>
+            </div>
+            <div class="code-block">
+// 创建时间线
+const tl = gsap.timeline({
+    repeat: -1,
+    yoyo: true,
+    onUpdate: () => {
+        // 更新进度条
+        const progress = tl.progress() * 100;
+        document.getElementById('timelineBar').style.width = progress + '%';
+    }
+});
+
+// 添加动画到时间线
+tl.to("#circle1", { y: -100, duration: 0.5 })
+  .to("#circle2", { y: -100, duration: 0.5 }, "-=0.3")  // 重叠时间
+  .to("#circle3", { y: -100, duration: 0.5 }, "-=0.3")
+  .to("#circle4", { y: -100, duration: 0.5 }, "-=0.3");
+
+// 时间线控制
+tl.pause();  // 暂停
+tl.resume(); // 继续
+tl.restart(); // 重新开始
+            </div>
+        </div>
+
+        <!-- 缓动函数 -->
+        <div class="demo-section">
+            <h2>3. 缓动函数 (Easing)</h2>
+            <div class="demo-area">
+                <div class="demo-box" id="ease1">EASE</div>
+                <div class="demo-box" id="ease2">BOUNCE</div>
+                <div class="demo-box" id="ease3">ELASTIC</div>
+                <div class="demo-box" id="ease4">BACK</div>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="animateEasing()">播放缓动动画</button>
+                <button class="btn" onclick="resetEasing()">重置</button>
+            </div>
+            <div class="code-block">
+// 不同的缓动函数
+gsap.to("#ease1", { x: 300, duration: 2, ease: "power2.inOut" });
+gsap.to("#ease2", { x: 300, duration: 2, ease: "bounce.out" });
+gsap.to("#ease3", { x: 300, duration: 2, ease: "elastic.out(1, 0.3)" });
+gsap.to("#ease4", { x: 300, duration: 2, ease: "back.out(1.7)" });
+
+// 常用缓动函数:
+// "none" - 线性
+// "power1.out", "power2.out", "power3.out", "power4.out"
+// "bounce.out", "elastic.out", "back.out"
+// "circ.out", "expo.out", "sine.out"
+            </div>
+        </div>
+
+        <!-- 变换动画 -->
+        <div class="demo-section">
+            <h2>4. 变换动画 (Transform)</h2>
+            <div class="demo-area">
+                <div class="demo-box" id="transform1">旋转</div>
+                <div class="demo-box" id="transform2">缩放</div>
+                <div class="demo-box" id="transform3">倾斜</div>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="animateTransform()">播放变换</button>
+                <button class="btn" onclick="resetTransform()">重置</button>
+            </div>
+            <div class="code-block">
+// 旋转
+gsap.to("#transform1", {
+    rotation: 360,
+    duration: 2,
+    ease: "power2.inOut"
+});
+
+// 缩放
+gsap.to("#transform2", {
+    scale: 1.5,
+    duration: 2,
+    ease: "elastic.out",
+    yoyo: true,
+    repeat: 1
+});
+
+// 倾斜
+gsap.to("#transform3", {
+    skewX: 30,
+    skewY: 10,
+    duration: 2,
+    ease: "back.out"
+});
+            </div>
+        </div>
+
+        <!-- 颜色和文本动画 -->
+        <div class="demo-section">
+            <h2>5. 颜色和文本动画</h2>
+            <div class="demo-area">
+                <div class="demo-text" id="colorText">彩色文本动画</div>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="animateColor()">播放颜色动画</button>
+                <button class="btn" onclick="resetColor()">重置</button>
+            </div>
+            <div class="code-block">
+// 颜色动画
+gsap.to("#colorText", {
+    color: "#ff6b6b",
+    backgroundColor: "#4ecdc4",
+    duration: 2,
+    ease: "power2.inOut",
+    yoyo: true,
+    repeat: 1
+});
+
+// 文本动画
+gsap.fromTo("#colorText", 
+    { fontSize: "24px" },
+    { fontSize: "48px", duration: 2, ease: "elastic.out" }
+);
+            </div>
+        </div>
+
+        <!-- SVG动画 -->
+        <div class="demo-section">
+            <h2>6. SVG 动画</h2>
+            <div class="demo-area">
+                <svg width="200" height="200" viewBox="0 0 200 200">
+                    <circle id="svgCircle" cx="100" cy="100" r="50" fill="#667eea" stroke="#764ba2" stroke-width="3"/>
+                    <path id="morphPath" d="M50,100 Q100,50 150,100 Q100,150 50,100" class="morphing-path"/>
+                </svg>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="animateSVG()">播放SVG动画</button>
+                <button class="btn" onclick="resetSVG()">重置</button>
+            </div>
+            <div class="code-block">
+// SVG 属性动画
+gsap.to("#svgCircle", {
+    attr: { r: 80, fill: "#ff6b6b" },
+    duration: 2,
+    ease: "bounce.out",
+    yoyo: true,
+    repeat: 1
+});
+
+// SVG 路径变形
+gsap.to("#morphPath", {
+    morphSVG: "M50,50 Q100,100 150,50 Q100,150 50,50",
+    duration: 2,
+    ease: "power2.inOut"
+});
+            </div>
+        </div>
+
+        <!-- 滚动触发器 -->
+        <div class="demo-section">
+            <h2>7. 滚动触发器 (ScrollTrigger)</h2>
+            <div class="demo-area">
+                <div class="demo-box" id="scrollBox">滚动我</div>
+            </div>
+            <div class="code-block">
+// 滚动触发器
+gsap.registerPlugin(ScrollTrigger);
+
+gsap.to("#scrollBox", {
+    x: 200,
+    rotation: 360,
+    scrollTrigger: {
+        trigger: "#scrollBox",
+        start: "top 80%",
+        end: "bottom 20%",
+        scrub: true,
+        markers: true
+    }
+});
+            </div>
+        </div>
+
+        <!-- 滚动区域 -->
+        <div class="scroll-section">
+            <div class="scroll-text" id="scrollText">继续滚动查看效果</div>
+        </div>
+
+        <!-- 高级功能 -->
+        <div class="demo-section">
+            <h2>8. 高级功能</h2>
+            <div class="demo-area">
+                <div class="demo-box" id="advanced1">延迟</div>
+                <div class="demo-box" id="advanced2">重复</div>
+                <div class="demo-box" id="advanced3">回调</div>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="animateAdvanced()">播放高级动画</button>
+                <button class="btn" onclick="resetAdvanced()">重置</button>
+            </div>
+            <div class="code-block">
+// 延迟动画
+gsap.to("#advanced1", {
+    y: -100,
+    duration: 1,
+    delay: 0.5,
+    ease: "bounce.out"
+});
+
+// 重复动画
+gsap.to("#advanced2", {
+    rotation: 360,
+    duration: 1,
+    repeat: 2,
+    yoyo: true
+});
+
+// 回调函数
+gsap.to("#advanced3", {
+    scale: 1.5,
+    duration: 1,
+    onStart: () => console.log("动画开始"),
+    onComplete: () => {
+        console.log("动画完成");
+        alert("动画完成！");
+    }
+});
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 注册 ScrollTrigger 插件
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 基本动画函数
+        function animateBasic() {
+            gsap.to("#box1", {
+                x: 200,
+                y: 50,
+                rotation: 360,
+                duration: 2,
+                ease: "bounce.out"
+            });
+
+            gsap.from("#box2", {
+                x: -200,
+                y: -50,
+                scale: 0,
+                duration: 2,
+                ease: "elastic.out"
+            });
+
+            gsap.fromTo("#box3", 
+                { x: -100, scale: 0, rotation: -180 },
+                { x: 100, scale: 1.5, rotation: 180, duration: 2, ease: "power2.inOut" }
+            );
+        }
+
+        function resetBasic() {
+            gsap.set("#box1, #box2, #box3", {
+                x: 0,
+                y: 0,
+                rotation: 0,
+                scale: 1
+            });
+        }
+
+        // 时间线动画
+        let tl = gsap.timeline({
+            paused: true,
+            onUpdate: () => {
+                const progress = tl.progress() * 100;
+                document.getElementById('timelineBar').style.width = progress + '%';
+            }
+        });
+
+        tl.to("#circle1", { y: -100, duration: 0.5 })
+          .to("#circle2", { y: -100, duration: 0.5 }, "-=0.3")
+          .to("#circle3", { y: -100, duration: 0.5 }, "-=0.3")
+          .to("#circle4", { y: -100, duration: 0.5 }, "-=0.3");
+
+        function animateTimeline() {
+            tl.restart();
+        }
+
+        function pauseTimeline() {
+            tl.pause();
+        }
+
+        function resumeTimeline() {
+            tl.resume();
+        }
+
+        function resetTimeline() {
+            tl.progress(0);
+            tl.pause();
+            document.getElementById('timelineBar').style.width = '0%';
+        }
+
+        // 缓动函数动画
+        function animateEasing() {
+            gsap.to("#ease1", { x: 300, duration: 2, ease: "power2.inOut" });
+            gsap.to("#ease2", { x: 300, duration: 2, ease: "bounce.out" });
+            gsap.to("#ease3", { x: 300, duration: 2, ease: "elastic.out(1, 0.3)" });
+            gsap.to("#ease4", { x: 300, duration: 2, ease: "back.out(1.7)" });
+        }
+
+        function resetEasing() {
+            gsap.set("#ease1, #ease2, #ease3, #ease4", { x: 0 });
+        }
+
+        // 变换动画
+        function animateTransform() {
+            gsap.to("#transform1", {
+                rotation: 360,
+                duration: 2,
+                ease: "power2.inOut"
+            });
+
+            gsap.to("#transform2", {
+                scale: 1.5,
+                duration: 2,
+                ease: "elastic.out",
+                yoyo: true,
+                repeat: 1
+            });
+
+            gsap.to("#transform3", {
+                skewX: 30,
+                skewY: 10,
+                duration: 2,
+                ease: "back.out"
+            });
+        }
+
+        function resetTransform() {
+            gsap.set("#transform1, #transform2, #transform3", {
+                rotation: 0,
+                scale: 1,
+                skewX: 0,
+                skewY: 0
+            });
+        }
+
+        // 颜色动画
+        function animateColor() {
+            gsap.to("#colorText", {
+                color: "#ff6b6b",
+                backgroundColor: "#4ecdc4",
+                fontSize: "48px",
+                duration: 2,
+                ease: "power2.inOut",
+                yoyo: true,
+                repeat: 1
+            });
+        }
+
+        function resetColor() {
+            gsap.set("#colorText", {
+                color: "#333",
+                backgroundColor: "transparent",
+                fontSize: "24px"
+            });
+        }
+
+        // SVG 动画
+        function animateSVG() {
+            gsap.to("#svgCircle", {
+                attr: { r: 80, fill: "#ff6b6b" },
+                duration: 2,
+                ease: "bounce.out",
+                yoyo: true,
+                repeat: 1
+            });
+        }
+
+        function resetSVG() {
+            gsap.set("#svgCircle", {
+                attr: { r: 50, fill: "#667eea" }
+            });
+        }
+
+        // 高级动画
+        function animateAdvanced() {
+            gsap.to("#advanced1", {
+                y: -100,
+                duration: 1,
+                delay: 0.5,
+                ease: "bounce.out"
+            });
+
+            gsap.to("#advanced2", {
+                rotation: 360,
+                duration: 1,
+                repeat: 2,
+                yoyo: true
+            });
+
+            gsap.to("#advanced3", {
+                scale: 1.5,
+                duration: 1,
+                onStart: () => console.log("动画开始"),
+                onComplete: () => {
+                    console.log("动画完成");
+                    alert("动画完成！");
+                }
+            });
+        }
+
+        function resetAdvanced() {
+            gsap.set("#advanced1, #advanced2, #advanced3", {
+                y: 0,
+                rotation: 0,
+                scale: 1
+            });
+        }
+
+        // 滚动触发器
+        gsap.to("#scrollBox", {
+            x: 200,
+            rotation: 360,
+            scrollTrigger: {
+                trigger: "#scrollBox",
+                start: "top 80%",
+                end: "bottom 20%",
+                scrub: true
+            }
+        });
+
+        gsap.fromTo("#scrollText", 
+            { opacity: 0, y: 50 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 2,
+                scrollTrigger: {
+                    trigger: "#scrollText",
+                    start: "top 80%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none reverse"
+                }
+            }
+        );
+
+        // 页面加载动画
+        gsap.from("h1", {
+            opacity: 0,
+            y: -50,
+            duration: 1,
+            ease: "bounce.out"
+        });
+
+        gsap.from(".demo-section", {
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power2.out"
+        });
+    </script>
+</body>
+</html> 
